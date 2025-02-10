@@ -1,0 +1,17 @@
+package com.workshopngine.platform.serviceoperations;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
+@SpringBootApplication
+@EnableJpaAuditing
+@EnableFeignClients
+public class ServiceOperationsApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ServiceOperationsApplication.class, args);
+	}
+
+}
