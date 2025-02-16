@@ -7,11 +7,11 @@ import com.workshopngine.platform.serviceoperations.shared.domain.model.events.A
 public class CreateWorkOrderCommandFromEventAssembler {
     public static CreateWorkOrderCommand toCommandFromEvent(AppointmentCreatedEvent event) {
         return new CreateWorkOrderCommand(
-            new ClientId(event.clientId()),
-                new VehicleId(event.vehicleId()),
-                new AppointmentId(event.appointmentId()),
-                new WorkshopId(event.workshopId()),
-                new MechanicId(event.mechanicId()),
+                new ClientId(event.getClientId()),
+                new VehicleId(event.getVehicleId()),
+                new AppointmentId(event.getAppointmentId()),
+                new WorkshopId(event.getWorkshopId()),
+                new MechanicId(event.getMechanicId()),
                 EPriority.LOW,
                 ERequestType.SCHEDULED
         );
