@@ -14,7 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class ServiceOperationsApplicationTests {
 	@Container
 	@ServiceConnection
-	static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0.26");
+	static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:9.2.0");
 
 	@Test
 	void contextLoads() {
