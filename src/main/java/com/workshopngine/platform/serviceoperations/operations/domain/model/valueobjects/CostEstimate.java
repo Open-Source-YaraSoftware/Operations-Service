@@ -13,13 +13,16 @@ import java.math.BigDecimal;
 @Builder
 @Embeddable
 @AllArgsConstructor
-public class Cost {
-    private BigDecimal totalCost;
+public class CostEstimate {
+    private BigDecimal amount;
 
     private String currency;
 
-    public Cost() {
-        this.totalCost = BigDecimal.ZERO;
+    private ECostStatus costStatus;
+
+    public CostEstimate() {
+        this.amount = BigDecimal.ZERO;
         this.currency = "PEN";
+        this.costStatus = ECostStatus.ESTIMATED;
     }
 }
