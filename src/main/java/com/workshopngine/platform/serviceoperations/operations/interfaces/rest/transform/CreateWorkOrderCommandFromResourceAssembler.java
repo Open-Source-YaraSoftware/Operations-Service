@@ -13,8 +13,8 @@ public class CreateWorkOrderCommandFromResourceAssembler {
                 new WorkshopId(resource.workshopId()),
                 new MechanicId(resource.mechanicAssignedId()),
                 resource.priority() != null ?  EPriority.fromString(resource.priority()): null,
-                resource.requestType() != null ? ERequestType.fromString(resource.requestType()): null
-
+                resource.requestType() != null ? ERequestType.fromString(resource.requestType()): null,
+                EServiceType.fromString(resource.serviceType())
         );
     }
 }
