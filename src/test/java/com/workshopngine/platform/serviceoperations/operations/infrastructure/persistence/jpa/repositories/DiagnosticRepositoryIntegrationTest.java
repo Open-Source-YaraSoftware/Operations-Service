@@ -2,7 +2,7 @@ package com.workshopngine.platform.serviceoperations.operations.infrastructure.p
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates.Diagnostic;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.DiagnosticDetails;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EDiagnosticType;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.MechanicId;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.VehicleId;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.WorkshopId;
@@ -15,8 +15,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.Collection;
 
 @DataJpaTest
 @Testcontainers
@@ -37,7 +35,9 @@ class DiagnosticRepositoryIntegrationTest {
                 workshopId,
                 new VehicleId("9bc16276-ad51-4216-a0f7-2aef0668c5c5"),
                 new MechanicId("1"),
-                new DiagnosticDetails("Reason for diagnostic", "Expected outcome", "Diagnostic procedure")
+                EDiagnosticType.PREVENTIVE,
+                "desired outcome",
+                "details"
         );
         var diagnostic = new Diagnostic(command);
         diagnosticRepository.save(diagnostic);
