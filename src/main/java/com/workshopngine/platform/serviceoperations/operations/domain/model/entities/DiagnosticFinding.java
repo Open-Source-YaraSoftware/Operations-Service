@@ -2,10 +2,11 @@ package com.workshopngine.platform.serviceoperations.operations.domain.model.ent
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates.Diagnostic;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticFindingCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateEvidenceCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateRecommendationCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateAttachmentCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EFindingSeverity;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EFindingStatus;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.FileId;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.ProposedSolution;
 import com.workshopngine.platform.serviceoperations.shared.domain.model.entities.AuditableModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -35,18 +37,25 @@ public class DiagnosticFinding extends AuditableModel {
     @Enumerated(EnumType.STRING)
     private EFindingSeverity severity;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "diagnosticFinding")
-    private Collection<Evidence> evidences;
+    @Embedded
+    private ProposedSolution proposedSolution;
+
+    @NotNull
+    private BigDecimal estimatedRepairCost;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EFindingStatus status;
+
+    private String remarks;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "diagnosticFinding")
-    private Collection<Recommendation> recommendedActions;
-
-    private Integer estimatedRepairCost;
+    private Collection<MediaAttachment> attachments;
 
     public DiagnosticFinding() {
         super();
-        this.evidences = new ArrayList<>();
-        this.recommendedActions = new ArrayList<>();
+        this.status = EFindingStatus.OPEN;
+        this.attachments = new ArrayList<>();
     }
 
     public DiagnosticFinding(CreateDiagnosticFindingCommand command, Diagnostic diagnostic) {
@@ -54,18 +63,18 @@ public class DiagnosticFinding extends AuditableModel {
         this.diagnostic = diagnostic;
         this.description = command.description();
         this.severity = command.severity();
+        this.proposedSolution = command.proposedSolution();
         this.estimatedRepairCost = command.estimatedRepairCost();
+        this.remarks = command.remarks();
     }
 
-    public Recommendation addRecommendation(CreateRecommendationCommand command){
-        var recommendation = new Recommendation(command, this);
-        this.recommendedActions.add(recommendation);
-        return recommendation;
-    }
-
-    public Evidence addEvidence(CreateEvidenceCommand command, FileId fileId){
-        var evidence = new Evidence(command, this, fileId);
-        this.evidences.add(evidence);
+    public MediaAttachment addAttachment(CreateAttachmentCommand command, FileId fileId){
+        var evidence = new MediaAttachment(command, this, fileId);
+        this.attachments.add(evidence);
         return evidence;
+    }
+
+    public void markAsResolved() {
+        this.status = EFindingStatus.RESOLVED;
     }
 }

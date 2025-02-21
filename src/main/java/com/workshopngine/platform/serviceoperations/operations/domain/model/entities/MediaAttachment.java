@@ -1,15 +1,16 @@
 package com.workshopngine.platform.serviceoperations.operations.domain.model.entities;
 
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateEvidenceCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateAttachmentCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.FileId;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.logging.log4j.util.Strings;
 
 @Getter
 @Setter
 @Entity
-public class Evidence {
+public class MediaAttachment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -17,18 +18,19 @@ public class Evidence {
     @Embedded
     private FileId fileId;
 
-    private String comment;
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "diagnostic_finding_id", nullable = false)
     private DiagnosticFinding diagnosticFinding;
 
-    public Evidence() {
+    public MediaAttachment() {
+        this.description = Strings.EMPTY;
     }
 
-    public Evidence(CreateEvidenceCommand command, DiagnosticFinding diagnosticFinding, FileId fileId) {
+    public MediaAttachment(CreateAttachmentCommand command, DiagnosticFinding diagnosticFinding, FileId fileId) {
         this.fileId = fileId;
-        this.comment = command.comment();
+        this.description = command.description();
         this.diagnosticFinding = diagnosticFinding;
     }
 }
