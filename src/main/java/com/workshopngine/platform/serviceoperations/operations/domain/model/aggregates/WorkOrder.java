@@ -1,7 +1,7 @@
 package com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates;
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateWorkOrderCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.ServiceOrder;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.WorkOrderItem;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.*;
 import com.workshopngine.platform.serviceoperations.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
@@ -40,22 +40,18 @@ public class WorkOrder extends AuditableAbstractAggregateRoot<WorkOrder> {
     private ERequestType requestType;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "workOrder")
-    private Collection<ServiceOrder> services;
+    private Collection<WorkOrderItem> items;
 
     @Embedded
-    private Cost cost;
-
-    @Embedded
-    private TimeInterval timeInterval;
+    private CostEstimate totalEstimatedCost;
 
     public WorkOrder() {
         super();
         this.status = EWorkOrderStatus.CREATED;
         this.priority = EPriority.LOW;
-        this.requestType = ERequestType.SCHEDULED;
-        this.cost = new Cost();
-        this.timeInterval = new TimeInterval();
-        this.services = new ArrayList<>();
+        this.requestType = ERequestType.IMMEDIATE;
+        this.totalEstimatedCost = new CostEstimate();
+        this.items = new ArrayList<>();
     }
 
     public WorkOrder(CreateWorkOrderCommand command) {
@@ -67,5 +63,11 @@ public class WorkOrder extends AuditableAbstractAggregateRoot<WorkOrder> {
         this.mechanicAssignedId = command.mechanicId();
         if (command.priority() != null) this.priority = command.priority();
         if (command.requestType() != null) this.requestType = command.requestType();
+        this.addItem(command);
+    }
+
+    private void addItem(CreateWorkOrderCommand command) {
+        WorkOrderItem item = new WorkOrderItem(this, command);
+        this.items.add(item);
     }
 }
