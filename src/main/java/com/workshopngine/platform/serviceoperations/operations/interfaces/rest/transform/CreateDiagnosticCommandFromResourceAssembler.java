@@ -1,7 +1,7 @@
 package com.workshopngine.platform.serviceoperations.operations.interfaces.rest.transform;
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.DiagnosticDetails;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EDiagnosticType;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.MechanicId;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.VehicleId;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.WorkshopId;
@@ -13,11 +13,9 @@ public class CreateDiagnosticCommandFromResourceAssembler {
                 new WorkshopId(resource.workshopId()),
                 new VehicleId(resource.vehicleId()),
                 new MechanicId(resource.mechanicId()),
-                new DiagnosticDetails(
-                        resource.reasonForDiagnostic(),
-                        resource.expectedOutcome(),
-                        resource.diagnosticProcedure()
-                )
+                EDiagnosticType.valueOf(resource.diagnosticType()),
+                resource.desiredOutcome(),
+                resource.details()
         );
     }
 }

@@ -1,9 +1,9 @@
 package com.workshopngine.platform.serviceoperations.operations.interfaces.rest.transform;
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticFindingCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.Recommendation;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EFindingSeverity;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.FileId;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.ESolutionType;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.ProposedSolution;
 import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.dto.CreateDiagnosticFindingResource;
 
 public class CreateDiagnosticFindingCommandFromResourceAssembler {
@@ -11,8 +11,10 @@ public class CreateDiagnosticFindingCommandFromResourceAssembler {
         return new CreateDiagnosticFindingCommand(
                 diagnosticId,
                 resource.description(),
-                EFindingSeverity.fromString(resource.severity()),
-                resource.estimatedRepairCost()
+                EFindingSeverity.valueOf(resource.severity()),
+                new ProposedSolution(resource.solutionDescription(), ESolutionType.fromString(resource.solutionType())),
+                resource.estimatedRepairCost(),
+                resource.remarks()
         );
     }
 }

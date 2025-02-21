@@ -1,8 +1,8 @@
 package com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates;
 
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateAttachmentCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticFindingCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateAttachmentCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.DiagnosticFinding;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.MediaAttachment;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.*;
