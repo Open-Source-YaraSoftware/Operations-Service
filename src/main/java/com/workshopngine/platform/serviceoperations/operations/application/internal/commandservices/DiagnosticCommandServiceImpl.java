@@ -2,13 +2,11 @@ package com.workshopngine.platform.serviceoperations.operations.application.inte
 
 import com.workshopngine.platform.serviceoperations.operations.application.internal.outboundservices.acl.FileManagementContextFacade;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates.Diagnostic;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateAttachmentCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticFindingCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateEvidenceCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateRecommendationCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.DiagnosticFinding;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.Evidence;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.Recommendation;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.MediaAttachment;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.FileId;
 import com.workshopngine.platform.serviceoperations.operations.domain.services.DiagnosticCommandService;
 import com.workshopngine.platform.serviceoperations.operations.infrastructure.persistence.jpa.repositories.DiagnosticRepository;
@@ -41,7 +39,7 @@ public class DiagnosticCommandServiceImpl implements DiagnosticCommandService {
     public Optional<DiagnosticFinding> handle(CreateDiagnosticFindingCommand command) {
         var diagnostic = diagnosticRepository.findById(command.diagnosticId());
         if (diagnostic.isEmpty()) throw new IllegalArgumentException("Diagnostic with ID %s not found".formatted(command.diagnosticId()));
-        var diagnosticFinding = diagnostic.get().addDiagnosticFinding(command);
+        var diagnosticFinding = diagnostic.get().addFinding(command);
         try {
             diagnosticRepository.save(diagnostic.get());
             return Optional.of(diagnosticFinding);
@@ -51,30 +49,17 @@ public class DiagnosticCommandServiceImpl implements DiagnosticCommandService {
     }
 
     @Override
-    public Optional<Evidence> handle(CreateEvidenceCommand command) {
+    public Optional<MediaAttachment> handle(CreateAttachmentCommand command) {
         var diagnostic = diagnosticRepository.findById(command.diagnosticId());
         if (diagnostic.isEmpty()) throw new IllegalArgumentException("Diagnostic with ID %s not found".formatted(command.diagnosticId()));
         var fileId = fileManagementContextFacade.fetchUploadFile(command.file());
         if (fileId.id() == null) throw new IllegalArgumentException("Error while uploading file");
-        var evidence = diagnostic.get().addEvidence(command, new FileId(fileId.id()));
+        var evidence = diagnostic.get().addAttachment(command, new FileId(fileId.id()));
         try {
             diagnosticRepository.save(diagnostic.get());
             return Optional.of(evidence);
         } catch (Exception e) {
             throw new IllegalArgumentException("Error while saving evidence: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public Optional<Recommendation> handle(CreateRecommendationCommand command) {
-        var diagnostic = diagnosticRepository.findById(command.diagnosticId());
-        if (diagnostic.isEmpty()) throw new IllegalArgumentException("Diagnostic with ID %s not found".formatted(command.diagnosticId()));
-        var recommendation = diagnostic.get().addRecommendation(command);
-        try {
-            diagnosticRepository.save(diagnostic.get());
-            return Optional.of(recommendation);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error while saving recommendation: " + e.getMessage());
         }
     }
 }
