@@ -1,15 +1,18 @@
 package com.workshopngine.platform.serviceoperations.operations.domain.model.commands;
 
-import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.Recommendation;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EFindingSeverity;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.FileId;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.ProposedSolution;
+import lombok.Builder;
 
-import java.util.Collection;
+import java.math.BigDecimal;
 
+@Builder
 public record CreateDiagnosticFindingCommand(
         String diagnosticId,
         String description,
         EFindingSeverity severity,
-        Integer estimatedRepairCost
+        ProposedSolution proposedSolution,
+        BigDecimal estimatedRepairCost,
+        String remarks
 ) {
 }
