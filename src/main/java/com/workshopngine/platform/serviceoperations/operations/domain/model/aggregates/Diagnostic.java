@@ -2,18 +2,19 @@ package com.workshopngine.platform.serviceoperations.operations.domain.model.agg
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticFindingCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateEvidenceCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateRecommendationCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateAttachmentCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.DiagnosticFinding;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.Evidence;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.Recommendation;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.MediaAttachment;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.*;
 import com.workshopngine.platform.serviceoperations.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.logging.log4j.util.Strings;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -30,20 +31,30 @@ public class Diagnostic extends AuditableAbstractAggregateRoot<Diagnostic> {
     @Embedded
     private MechanicId mechanicId;
 
-    @Embedded
-    private DiagnosticDetails diagnosticDetails;
+    @Enumerated(EnumType.STRING)
+    private EDiagnosticType diagnosticType;
+
+    private String desiredOutcome;
+
+    @NotBlank
+    private String details;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     private EDiagnosticStatus status;
 
+    private LocalDateTime completedAt;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "diagnostic")
-    private Collection<DiagnosticFinding> diagnosticFindings;
+    private Collection<DiagnosticFinding> findings;
 
     public Diagnostic() {
         super();
+        this.details = Strings.EMPTY;
+        this.desiredOutcome = Strings.EMPTY;
         this.status = EDiagnosticStatus.PENDING;
-        this.diagnosticFindings = new ArrayList<>();
+        this.completedAt = null;
+        this.findings = new ArrayList<>();
     }
 
     public Diagnostic(CreateDiagnosticCommand command){
@@ -51,29 +62,36 @@ public class Diagnostic extends AuditableAbstractAggregateRoot<Diagnostic> {
         this.workshopId = command.workshopId();
         this.vehicleId = command.vehicleId();
         this.mechanicId = command.mechanicId();
-        this.diagnosticDetails = command.diagnosticDetails();
+        this.diagnosticType = command.diagnosticType();
+        this.desiredOutcome = command.desiredOutcome();
+        this.details = command.details();
     }
 
-    public DiagnosticFinding addDiagnosticFinding(CreateDiagnosticFindingCommand command){
+    public DiagnosticFinding addFinding(CreateDiagnosticFindingCommand command){
         var diagnosticFinding = new DiagnosticFinding(command, this);
-        this.diagnosticFindings.add(diagnosticFinding);
+        this.findings.add(diagnosticFinding);
         return diagnosticFinding;
     }
 
-    public DiagnosticFinding getDiagnosticFindingById(String diagnosticFindingId){
-        return this.diagnosticFindings.stream()
+    public DiagnosticFinding getFindingById(String diagnosticFindingId){
+        return this.findings.stream()
                 .filter(diagnosticFinding -> diagnosticFinding.getId().equals(diagnosticFindingId))
                 .findFirst()
                 .orElseThrow();
     }
 
-    public Recommendation addRecommendation(CreateRecommendationCommand command){
-        var diagnosticFinding = getDiagnosticFindingById(command.diagnosticFindingId());
-        return diagnosticFinding.addRecommendation(command);
+    public MediaAttachment addAttachment(CreateAttachmentCommand command, FileId fileId){
+        var diagnosticFinding = getFindingById(command.diagnosticFindingId());
+        return diagnosticFinding.addAttachment(command, fileId);
     }
 
-    public Evidence addEvidence(CreateEvidenceCommand command, FileId fileId){
-        var diagnosticFinding = getDiagnosticFindingById(command.diagnosticFindingId());
-        return diagnosticFinding.addEvidence(command, fileId);
+    public void complete(){
+        this.status = EDiagnosticStatus.COMPLETED;
+        this.completedAt = LocalDateTime.now();
+    }
+
+    public void cancel(){
+        this.status = EDiagnosticStatus.CANCELLED;
+        this.completedAt = LocalDateTime.now();
     }
 }
