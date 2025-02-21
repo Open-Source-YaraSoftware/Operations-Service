@@ -1,10 +1,15 @@
 package com.workshopngine.platform.serviceoperations.operations.interfaces.rest.dto;
 
+import java.math.BigDecimal;
+
 public record DiagnosticFindingResource(
         String id,
-        String diagnosticId,
         String description,
         String severity,
-        Integer estimatedRepairCost
+        String solutionDescription,
+        String solutionType,
+        BigDecimal estimatedRepairCost,
+        String status,
+        String remarks
 ) {
 }

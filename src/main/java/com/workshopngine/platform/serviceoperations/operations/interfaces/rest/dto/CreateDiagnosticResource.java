@@ -4,8 +4,8 @@ public record CreateDiagnosticResource(
         String workshopId,
         String vehicleId,
         String mechanicId,
-        String reasonForDiagnostic,
-        String expectedOutcome,
-        String diagnosticProcedure
+        String diagnosticType,
+        String desiredOutcome,
+        String details
 ) {
 }
