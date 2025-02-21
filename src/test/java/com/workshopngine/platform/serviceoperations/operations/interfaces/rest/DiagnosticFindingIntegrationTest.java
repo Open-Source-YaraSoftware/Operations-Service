@@ -30,75 +30,36 @@ class DiagnosticFindingIntegrationTest {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
+    private static final String WORKSHOP_ID_VALUE = "134534553d-5e6f-7g8h-9i0j-a1b12313535f6";
+    private static final String VEHICLE_ID_VALUE = "6868678d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+    private static final String MECHANIC_ID_VALUE = "3435567d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+
     @Test
     void TestGetAllDiagnosticFinding_ValidDiagnosticId_ShouldPass() {
         // Given
-        CreateDiagnosticResource createDiagnosticResource = new CreateDiagnosticResource(
-                "1",
-                "1",
-                "9bc16276-ad51-4216-a0f7-2aef0668c5c5",
-                "Reason for diagnostic",
-                "Expected outcome",
-                "Diagnostic procedure"
-        );
-        ResponseEntity<DiagnosticResource> createdDiagnosticResponse = testRestTemplate.exchange(
-                "/diagnostics",
-                HttpMethod.POST,
-                new HttpEntity<>(createDiagnosticResource),
-                DiagnosticResource.class
-        );
+        CreateDiagnosticResource createDiagnosticResource = buildCreateDiagnosticResource();
+        ResponseEntity<DiagnosticResource> createdDiagnosticResponse = createDiagnosticResponse(createDiagnosticResource);
+
         Assertions.assertThat(createdDiagnosticResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(createdDiagnosticResponse.getBody()).isNotNull();
         String diagnosticId = createdDiagnosticResponse.getBody().id();
 
-        CreateDiagnosticFindingResource createDiagnosticFindingResource1 = new CreateDiagnosticFindingResource(
-                "Finding description",
-                "LOW",
-                "solution description",
-                "IMMEDIATE",
-                BigDecimal.valueOf(100),
-                "remarks"
-        );
+        CreateDiagnosticFindingResource createDiagnosticFindingResource1 = buildCreateDiagnosticFindingResource();
 
-        ResponseEntity<DiagnosticFindingResource> createdDiagnosticFindingResponse1 = testRestTemplate.exchange(
-                "/diagnostics/{diagnosticId}/findings",
-                HttpMethod.POST,
-                new HttpEntity<>(createDiagnosticFindingResource1),
-                DiagnosticFindingResource.class,
-                diagnosticId
-        );
+        ResponseEntity<DiagnosticFindingResource> createdDiagnosticFindingResponse1 = createDiagnosticFindingResponse(createDiagnosticFindingResource1, diagnosticId);
 
         Assertions.assertThat(createdDiagnosticFindingResponse1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(createdDiagnosticFindingResponse1.getBody()).isNotNull();
 
-        CreateDiagnosticFindingResource createDiagnosticFindingResource2 = new CreateDiagnosticFindingResource(
-                "Finding description",
-                "LOW",
-                "solution description",
-                "IMMEDIATE",
-                BigDecimal.valueOf(100),
-                "remarks"
-        );
+        CreateDiagnosticFindingResource createDiagnosticFindingResource2 = buildCreateDiagnosticFindingResource();
 
-        ResponseEntity<DiagnosticFindingResource> createdDiagnosticFindingResponse2 = testRestTemplate.exchange(
-                "/diagnostics/{diagnosticId}/findings",
-                HttpMethod.POST,
-                new HttpEntity<>(createDiagnosticFindingResource2),
-                DiagnosticFindingResource.class,
-                diagnosticId
-        );
+        ResponseEntity<DiagnosticFindingResource> createdDiagnosticFindingResponse2 = createDiagnosticFindingResponse(createDiagnosticFindingResource2, diagnosticId);
 
         Assertions.assertThat(createdDiagnosticFindingResponse2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(createdDiagnosticFindingResponse2.getBody()).isNotNull();
 
         // When
-        ResponseEntity<DiagnosticFindingResource[]> diagnosticFindingsResponse = testRestTemplate.exchange(
-                "/diagnostics/{diagnosticId}/findings",
-                HttpMethod.GET,
-                HttpEntity.EMPTY,
-                DiagnosticFindingResource[].class,
-                diagnosticId
-        );
+        ResponseEntity<DiagnosticFindingResource[]> diagnosticFindingsResponse = getAllDiagnosticFindingResponseByDiagnosticId(diagnosticId);
 
         // Then
         Assertions.assertThat(diagnosticFindingsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -109,41 +70,17 @@ class DiagnosticFindingIntegrationTest {
     @Test
     void TestCreateDiagnosticFinding_ValidResource_ShouldPass() {
         // Given
-        CreateDiagnosticResource createDiagnosticResource = new CreateDiagnosticResource(
-                "1",
-                "1",
-                "9bc16276-ad51-4216-a0f7-2aef0668c5c5",
-                "Reason for diagnostic",
-                "Expected outcome",
-                "Diagnostic procedure"
-        );
-        ResponseEntity<DiagnosticResource> createdDiagnosticResponse = testRestTemplate.exchange(
-                "/diagnostics",
-                HttpMethod.POST,
-                new HttpEntity<>(createDiagnosticResource),
-                DiagnosticResource.class
-        );
+        CreateDiagnosticResource createDiagnosticResource = buildCreateDiagnosticResource();
+        ResponseEntity<DiagnosticResource> createdDiagnosticResponse = createDiagnosticResponse(createDiagnosticResource);
+
         Assertions.assertThat(createdDiagnosticResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(createdDiagnosticResponse.getBody()).isNotNull();
         String diagnosticId = createdDiagnosticResponse.getBody().id();
 
-        CreateDiagnosticFindingResource createDiagnosticFindingResource = new CreateDiagnosticFindingResource(
-                "Finding description",
-                "LOW",
-                "solution description",
-                "IMMEDIATE",
-                BigDecimal.valueOf(100),
-                "remarks"
-        );
+        CreateDiagnosticFindingResource createDiagnosticFindingResource = buildCreateDiagnosticFindingResource();
 
         // When
-        ResponseEntity<DiagnosticFindingResource> createdDiagnosticFindingResponse = testRestTemplate.exchange(
-                "/diagnostics/{diagnosticId}/findings",
-                HttpMethod.POST,
-                new HttpEntity<>(createDiagnosticFindingResource),
-                DiagnosticFindingResource.class,
-                diagnosticId
-        );
+        ResponseEntity<DiagnosticFindingResource> createdDiagnosticFindingResponse = createDiagnosticFindingResponse(createDiagnosticFindingResource, diagnosticId);
 
         // Then
         Assertions.assertThat(createdDiagnosticFindingResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
@@ -151,5 +88,65 @@ class DiagnosticFindingIntegrationTest {
         Assertions.assertThat(createdDiagnosticFindingResponse.getBody().description()).isEqualTo(createDiagnosticFindingResource.description());
         Assertions.assertThat(createdDiagnosticFindingResponse.getBody().severity()).isEqualTo(createDiagnosticFindingResource.severity());
         Assertions.assertThat(createdDiagnosticFindingResponse.getBody().estimatedRepairCost()).isEqualTo(createDiagnosticFindingResource.estimatedRepairCost());
+    }
+
+    private CreateDiagnosticResource buildCreateDiagnosticResource() {
+        return CreateDiagnosticResource.builder()
+                .workshopId(WORKSHOP_ID_VALUE)
+                .vehicleId(VEHICLE_ID_VALUE)
+                .mechanicId(MECHANIC_ID_VALUE)
+                .diagnosticType("PREVENTIVE")
+                .desiredOutcome("desired outcome")
+                .details("details")
+                .build();
+    }
+
+    private ResponseEntity<DiagnosticResource> createDiagnosticResponse(CreateDiagnosticResource createDiagnosticResource) {
+        return testRestTemplate.exchange(
+                "/diagnostics",
+                HttpMethod.POST,
+                new HttpEntity<>(createDiagnosticResource),
+                DiagnosticResource.class
+        );
+    }
+
+    private ResponseEntity<DiagnosticResource> getDiagnosticResponse(String diagnosticId) {
+        return testRestTemplate.exchange(
+                "/diagnostics/" + diagnosticId,
+                HttpMethod.GET,
+                null,
+                DiagnosticResource.class
+        );
+    }
+
+    private CreateDiagnosticFindingResource buildCreateDiagnosticFindingResource() {
+        return CreateDiagnosticFindingResource.builder()
+            .description("Finding description")
+            .severity("LOW")
+            .solutionDescription("solution description")
+            .solutionType("IMMEDIATE")
+            .estimatedRepairCost(BigDecimal.valueOf(100))
+            .remarks("remarks")
+            .build();
+    }
+
+    private ResponseEntity<DiagnosticFindingResource> createDiagnosticFindingResponse(CreateDiagnosticFindingResource createDiagnosticFindingResource, String diagnosticId) {
+        return testRestTemplate.exchange(
+            "/diagnostics/{diagnosticId}/findings",
+            HttpMethod.POST,
+            new HttpEntity<>(createDiagnosticFindingResource),
+            DiagnosticFindingResource.class,
+            diagnosticId
+        );
+    }
+
+    private ResponseEntity<DiagnosticFindingResource[]> getAllDiagnosticFindingResponseByDiagnosticId(String diagnosticId) {
+        return testRestTemplate.exchange(
+            "/diagnostics/{diagnosticId}/findings",
+            HttpMethod.GET,
+            HttpEntity.EMPTY,
+            DiagnosticFindingResource[].class,
+            diagnosticId
+        );
     }
 }

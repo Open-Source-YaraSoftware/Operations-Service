@@ -1,5 +1,10 @@
 package com.workshopngine.platform.serviceoperations.operations.interfaces.rest;
 
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EDiagnosticType;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.MechanicId;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.VehicleId;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.WorkshopId;
 import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.dto.CreateDiagnosticResource;
 import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.dto.DiagnosticResource;
 import org.assertj.core.api.Assertions;
@@ -28,33 +33,20 @@ class DiagnosticIntegrationTest {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
+    private static final String WORKSHOP_ID_VALUE = "134534553d-5e6f-7g8h-9i0j-a1b12313535f6";
+    private static final String VEHICLE_ID_VALUE = "6868678d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+    private static final String MECHANIC_ID_VALUE = "3435567d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+
     @Test
     void TestGetDiagnostic_ValidId_ShouldPass() {
         // Given
-        CreateDiagnosticResource createDiagnosticResource = new CreateDiagnosticResource(
-            "1",
-            "1",
-            "9bc16276-ad51-4216-a0f7-2aef0668c5c5",
-            "Reason for diagnostic",
-            "Expected outcome",
-            "Diagnostic procedure"
-        );
-        ResponseEntity<DiagnosticResource> createDiagnosticResponse = testRestTemplate.exchange(
-            "/diagnostics",
-            HttpMethod.POST,
-            new HttpEntity<>(createDiagnosticResource),
-            DiagnosticResource.class
-        );
+        CreateDiagnosticResource createDiagnosticResource = buildCreateDiagnosticResource();
+        ResponseEntity<DiagnosticResource> createDiagnosticResponse = createDiagnosticResponse(createDiagnosticResource);
         Assertions.assertThat(createDiagnosticResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         String diagnosticId = Objects.requireNonNull(createDiagnosticResponse.getBody()).id();
 
         // When
-        ResponseEntity<DiagnosticResource> getDiagnosticResponse = testRestTemplate.exchange(
-            "/diagnostics/" + diagnosticId,
-            HttpMethod.GET,
-            null,
-            DiagnosticResource.class
-        );
+        ResponseEntity<DiagnosticResource> getDiagnosticResponse = getDiagnosticResponse(diagnosticId);
 
         // Then
         Assertions.assertThat(getDiagnosticResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -73,21 +65,9 @@ class DiagnosticIntegrationTest {
     @Test
     void TestCreateDiagnostic_ValidResource_Should_Pass() {
         // Given
-        CreateDiagnosticResource createDiagnosticResource = new CreateDiagnosticResource(
-            "1",
-            "1",
-            "9bc16276-ad51-4216-a0f7-2aef0668c5c5",
-            "Reason for diagnostic",
-            "Expected outcome",
-            "Diagnostic procedure"
-        );
+        CreateDiagnosticResource createDiagnosticResource = buildCreateDiagnosticResource();
         // When
-        ResponseEntity<DiagnosticResource> createDiagnosticResponse = testRestTemplate.exchange(
-            "/diagnostics",
-            HttpMethod.POST,
-            new HttpEntity<>(createDiagnosticResource),
-            DiagnosticResource.class
-        );
+        ResponseEntity<DiagnosticResource> createDiagnosticResponse = createDiagnosticResponse(createDiagnosticResource);
         // Then
         Assertions.assertThat(createDiagnosticResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(createDiagnosticResponse.getBody()).isNotNull();
@@ -100,5 +80,34 @@ class DiagnosticIntegrationTest {
         Assertions.assertThat(createDiagnosticResponse.getBody().details()).isEqualTo(createDiagnosticResource.details());
         Assertions.assertThat(createDiagnosticResponse.getBody().completedAt()).isNull();
         Assertions.assertThat(createDiagnosticResponse.getBody().status()).isEqualTo("PENDING");
+    }
+
+    private CreateDiagnosticResource buildCreateDiagnosticResource() {
+        return CreateDiagnosticResource.builder()
+            .workshopId(WORKSHOP_ID_VALUE)
+            .vehicleId(VEHICLE_ID_VALUE)
+            .mechanicId(MECHANIC_ID_VALUE)
+            .diagnosticType("PREVENTIVE")
+            .desiredOutcome("desired outcome")
+            .details("details")
+            .build();
+    }
+
+    private ResponseEntity<DiagnosticResource> createDiagnosticResponse(CreateDiagnosticResource createDiagnosticResource) {
+        return testRestTemplate.exchange(
+            "/diagnostics",
+            HttpMethod.POST,
+            new HttpEntity<>(createDiagnosticResource),
+            DiagnosticResource.class
+        );
+    }
+
+    private ResponseEntity<DiagnosticResource> getDiagnosticResponse(String diagnosticId) {
+        return testRestTemplate.exchange(
+            "/diagnostics/" + diagnosticId,
+            HttpMethod.GET,
+            null,
+            DiagnosticResource.class
+        );
     }
 }
