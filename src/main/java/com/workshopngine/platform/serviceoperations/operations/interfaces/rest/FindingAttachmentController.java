@@ -1,12 +1,12 @@
 package com.workshopngine.platform.serviceoperations.operations.interfaces.rest;
 
-import com.workshopngine.platform.serviceoperations.operations.domain.model.queries.GetAllEvidencesByDiagnosticFindingIdQuery;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.queries.GetAllAttachmentByDiagnosticFindingIdQuery;
 import com.workshopngine.platform.serviceoperations.operations.domain.services.DiagnosticCommandService;
 import com.workshopngine.platform.serviceoperations.operations.domain.services.DiagnosticQueryService;
-import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.dto.CreateEvidenceResource;
-import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.dto.EvidenceResource;
-import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.transform.CreateDiagnosticEvidenceCommandFromResourceAssembler;
-import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.transform.EvidenceResourceFromEntityAssembler;
+import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.dto.CreateAttachmentResource;
+import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.dto.AttachmentResource;
+import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.transform.CreateDiagnosticAttachmentCommandFromResourceAssembler;
+import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.transform.AttachmentResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -22,11 +22,11 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @RestController
 @RequestMapping(value = "/diagnostics/{diagnosticId}/findings/{findingId}/evidences", produces = APPLICATION_JSON_VALUE)
 @Tag(name = "Diagnostics", description = "Diagnostic Endpoints")
-public class EvidenceController {
+public class FindingAttachmentController {
     private final DiagnosticCommandService diagnosticCommandService;
     private final DiagnosticQueryService diagnosticQueryService;
 
-    public EvidenceController(DiagnosticCommandService diagnosticCommandService, DiagnosticQueryService diagnosticQueryService) {
+    public FindingAttachmentController(DiagnosticCommandService diagnosticCommandService, DiagnosticQueryService diagnosticQueryService) {
         this.diagnosticCommandService = diagnosticCommandService;
         this.diagnosticQueryService = diagnosticQueryService;
     }
@@ -37,15 +37,15 @@ public class EvidenceController {
             @ApiResponse(responseCode = "200", description = "Diagnostic evidences retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Diagnostic not found")
     })
-    public ResponseEntity<EvidenceResource[]> getAllDiagnosticsEvidencesById(
+    public ResponseEntity<AttachmentResource[]> getAllDiagnosticsEvidencesById(
             @PathVariable String diagnosticId,
             @PathVariable String findingId
     ) {
-        var query = new GetAllEvidencesByDiagnosticFindingIdQuery(diagnosticId, findingId);
+        var query = new GetAllAttachmentByDiagnosticFindingIdQuery(diagnosticId, findingId);
         var diagnosticEvidences = diagnosticQueryService.handle(query);
         var diagnosticEvidenceResources = diagnosticEvidences.stream()
-                .map(EvidenceResourceFromEntityAssembler::toResourceFromEntity)
-                .toArray(EvidenceResource[]::new);
+                .map(AttachmentResourceFromEntityAssembler::toResourceFromEntity)
+                .toArray(AttachmentResource[]::new);
         return new ResponseEntity<>(diagnosticEvidenceResources, HttpStatus.OK);
     }
 
@@ -55,16 +55,16 @@ public class EvidenceController {
             @ApiResponse(responseCode = "201", description = "Diagnostic evidence created"),
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
-    public ResponseEntity<EvidenceResource> createDiagnosticEvidence(
+    public ResponseEntity<AttachmentResource> createDiagnosticEvidence(
             @PathVariable String diagnosticId,
             @PathVariable String findingId,
-            @RequestPart("resource") CreateEvidenceResource resource,
+            @RequestPart("resource") CreateAttachmentResource resource,
             @RequestPart("file") MultipartFile file
     ){
-        var command = CreateDiagnosticEvidenceCommandFromResourceAssembler.toCommandFromResource(diagnosticId, findingId, file, resource);
+        var command = CreateDiagnosticAttachmentCommandFromResourceAssembler.toCommandFromResource(diagnosticId, findingId, file, resource);
         var evidence = diagnosticCommandService.handle(command);
         if (evidence.isEmpty()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        var evidenceResource = EvidenceResourceFromEntityAssembler.toResourceFromEntity(evidence.get());
+        var evidenceResource = AttachmentResourceFromEntityAssembler.toResourceFromEntity(evidence.get());
         return new ResponseEntity<>(evidenceResource, HttpStatus.CREATED);
     }
 }
