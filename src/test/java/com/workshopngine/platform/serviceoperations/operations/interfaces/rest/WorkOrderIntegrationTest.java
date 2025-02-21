@@ -29,34 +29,27 @@ class WorkOrderIntegrationTest {
     @Autowired
     private TestRestTemplate testRestTemplate;
 
+    private static final String WORK_ORDER_RESOURCE = "/work-orders";
+    private static final String WORK_ORDER_RESOURCE_ID = "/work-orders/{id}";
+    private static final String CLIENT_ID = "f5741603-ee90-48b5-a699-32268e81685d";
+    private static final String VEHICLE_ID = "f6a2f271-fda3-4099-8ca5-5d5620841d53";
+    private static final String APPOINTMENT_ID = "a3ea0bc7-27e7-4484-a7bd-a12a81841bef";
+    private static final String WORKSHOP_ID = "0f89d3f2-0d95-4b46-bd9f-c73cc7ef5955";
+    private static final String MECHANIC_ASSIGNED_ID = "61219089-c749-4631-bb2a-3ce6face2902";
+
     @Test
-    void getWorkOrderById() {
+    void TestGetWorkshop_ValidId_ShouldPass() {
         // Given
-        CreateWorkOrderResource createWorkOrderResource = new CreateWorkOrderResource(
-                "22222",
-                "3333",
-                "6666",
-                "11111",
-                "585858",
-                "LOW",
-                "IMMEDIATE"
-        );
-        ResponseEntity<WorkOrderResource> createWorkOrderResponse = testRestTemplate.exchange(
-                "/work-orders",
-                HttpMethod.POST,
-                new HttpEntity<>(createWorkOrderResource),
-                WorkOrderResource.class
-        );
+        CreateWorkOrderResource createWorkOrderResource = createWorkOrderResource();
+
+        ResponseEntity<WorkOrderResource> createWorkOrderResponse = createWorkOrderResponse(createWorkOrderResource);
+
         Assertions.assertThat(createWorkOrderResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         String workOrderId = Objects.requireNonNull(createWorkOrderResponse.getBody()).id();
 
         // When
-        ResponseEntity<WorkOrderResource> getWorkOrderResponse = testRestTemplate.exchange(
-                "/work-orders/" + workOrderId,
-                HttpMethod.GET,
-                null,
-                WorkOrderResource.class
-        );
+        ResponseEntity<WorkOrderResource> getWorkOrderResponse = getWorkOrderResponse(workOrderId);
+
         // Then
         Assertions.assertThat(getWorkOrderResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(getWorkOrderResponse.getBody()).isNotNull();
@@ -69,32 +62,17 @@ class WorkOrderIntegrationTest {
         Assertions.assertThat(getWorkOrderResponse.getBody().status()).isEqualTo("CREATED");
         Assertions.assertThat(getWorkOrderResponse.getBody().priority()).isEqualTo(createWorkOrderResource.priority());
         Assertions.assertThat(getWorkOrderResponse.getBody().requestType()).isEqualTo(createWorkOrderResource.requestType());
-        Assertions.assertThat(getWorkOrderResponse.getBody().totalCost().compareTo(BigDecimal.ZERO)).isEqualTo(0);
+        Assertions.assertThat(getWorkOrderResponse.getBody().amount()).isEqualByComparingTo(BigDecimal.ZERO);
         Assertions.assertThat(getWorkOrderResponse.getBody().currency()).isEqualTo("PEN");
-        Assertions.assertThat(getWorkOrderResponse.getBody().start()).isNotNull();
-        Assertions.assertThat(getWorkOrderResponse.getBody().end()).isNull();
-        Assertions.assertThat(getWorkOrderResponse.getBody().duration()).isNull();
+        Assertions.assertThat(getWorkOrderResponse.getBody().costStatus()).isEqualTo("ESTIMATED");
     }
 
     @Test
-    void createWorkOrder() {
+    void TestCreateWorkOrder_ValidRequest_ShouldPass() {
         // Given
-        CreateWorkOrderResource createWorkOrderResource = new CreateWorkOrderResource(
-                "1111",
-                "2222",
-                "3333",
-                "4444",
-                "5555",
-                "HIGH",
-                "SCHEDULED"
-        );
+        CreateWorkOrderResource createWorkOrderResource = createWorkOrderResource();
         // When
-        ResponseEntity<WorkOrderResource> createWorkOrderResponse = testRestTemplate.exchange(
-                "/work-orders",
-                HttpMethod.POST,
-                new HttpEntity<>(createWorkOrderResource),
-                WorkOrderResource.class
-        );
+        ResponseEntity<WorkOrderResource> createWorkOrderResponse = createWorkOrderResponse(createWorkOrderResource);
         // Then
         Assertions.assertThat(createWorkOrderResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(createWorkOrderResponse.getBody()).isNotNull();
@@ -107,10 +85,40 @@ class WorkOrderIntegrationTest {
         Assertions.assertThat(createWorkOrderResponse.getBody().status()).isEqualTo("CREATED");
         Assertions.assertThat(createWorkOrderResponse.getBody().priority()).isEqualTo(createWorkOrderResource.priority());
         Assertions.assertThat(createWorkOrderResponse.getBody().requestType()).isEqualTo(createWorkOrderResource.requestType());
-        Assertions.assertThat(createWorkOrderResponse.getBody().totalCost()).isEqualTo(BigDecimal.ZERO);
+        Assertions.assertThat(createWorkOrderResponse.getBody().amount()).isEqualTo(BigDecimal.ZERO);
         Assertions.assertThat(createWorkOrderResponse.getBody().currency()).isEqualTo("PEN");
-        Assertions.assertThat(createWorkOrderResponse.getBody().start()).isNotNull();
-        Assertions.assertThat(createWorkOrderResponse.getBody().end()).isNull();
-        Assertions.assertThat(createWorkOrderResponse.getBody().duration()).isNull();
+        Assertions.assertThat(createWorkOrderResponse.getBody().costStatus()).isEqualTo("ESTIMATED");
+    }
+
+    private CreateWorkOrderResource createWorkOrderResource() {
+        return CreateWorkOrderResource.builder()
+                .clientId(CLIENT_ID)
+                .vehicleId(VEHICLE_ID)
+                .appointmentId(APPOINTMENT_ID)
+                .workshopId(WORKSHOP_ID)
+                .mechanicAssignedId(MECHANIC_ASSIGNED_ID)
+                .priority("MEDIUM")
+                .requestType("IMMEDIATE")
+                .serviceType("REPAIR")
+                .build();
+    }
+
+    private ResponseEntity<WorkOrderResource> createWorkOrderResponse(CreateWorkOrderResource createWorkOrderResource) {
+        return testRestTemplate.exchange(
+                WORK_ORDER_RESOURCE,
+                HttpMethod.POST,
+                new HttpEntity<>(createWorkOrderResource),
+                WorkOrderResource.class
+        );
+    }
+
+    private ResponseEntity<WorkOrderResource> getWorkOrderResponse(String workOrderId) {
+        return testRestTemplate.exchange(
+                WORK_ORDER_RESOURCE_ID,
+                HttpMethod.GET,
+                null,
+                WorkOrderResource.class,
+                workOrderId
+        );
     }
 }
