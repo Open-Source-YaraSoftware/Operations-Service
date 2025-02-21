@@ -63,9 +63,10 @@ class DiagnosticIntegrationTest {
         Assertions.assertThat(getDiagnosticResponse.getBody().workshopId()).isEqualTo(createDiagnosticResource.workshopId());
         Assertions.assertThat(getDiagnosticResponse.getBody().vehicleId()).isEqualTo(createDiagnosticResource.vehicleId());
         Assertions.assertThat(getDiagnosticResponse.getBody().mechanicId()).isEqualTo(createDiagnosticResource.mechanicId());
-        Assertions.assertThat(getDiagnosticResponse.getBody().reasonForDiagnostic()).isEqualTo(createDiagnosticResource.reasonForDiagnostic());
-        Assertions.assertThat(getDiagnosticResponse.getBody().expectedOutcome()).isEqualTo(createDiagnosticResource.expectedOutcome());
-        Assertions.assertThat(getDiagnosticResponse.getBody().diagnosticProcedure()).isEqualTo(createDiagnosticResource.diagnosticProcedure());
+        Assertions.assertThat(getDiagnosticResponse.getBody().diagnosticType()).isEqualTo("PREVENTIVE");
+        Assertions.assertThat(getDiagnosticResponse.getBody().desiredOutcome()).isEqualTo(createDiagnosticResource.desiredOutcome());
+        Assertions.assertThat(getDiagnosticResponse.getBody().details()).isEqualTo(createDiagnosticResource.details());
+        Assertions.assertThat(getDiagnosticResponse.getBody().completedAt()).isNull();
         Assertions.assertThat(getDiagnosticResponse.getBody().status()).isEqualTo("PENDING");
     }
 
@@ -94,9 +95,10 @@ class DiagnosticIntegrationTest {
         Assertions.assertThat(createDiagnosticResponse.getBody().workshopId()).isEqualTo(createDiagnosticResource.workshopId());
         Assertions.assertThat(createDiagnosticResponse.getBody().vehicleId()).isEqualTo(createDiagnosticResource.vehicleId());
         Assertions.assertThat(createDiagnosticResponse.getBody().mechanicId()).isEqualTo(createDiagnosticResource.mechanicId());
-        Assertions.assertThat(createDiagnosticResponse.getBody().reasonForDiagnostic()).isEqualTo(createDiagnosticResource.reasonForDiagnostic());
-        Assertions.assertThat(createDiagnosticResponse.getBody().expectedOutcome()).isEqualTo(createDiagnosticResource.expectedOutcome());
-        Assertions.assertThat(createDiagnosticResponse.getBody().diagnosticProcedure()).isEqualTo(createDiagnosticResource.diagnosticProcedure());
+        Assertions.assertThat(createDiagnosticResponse.getBody().diagnosticType()).isEqualTo("PREVENTIVE");
+        Assertions.assertThat(createDiagnosticResponse.getBody().desiredOutcome()).isEqualTo(createDiagnosticResource.desiredOutcome());
+        Assertions.assertThat(createDiagnosticResponse.getBody().details()).isEqualTo(createDiagnosticResource.details());
+        Assertions.assertThat(createDiagnosticResponse.getBody().completedAt()).isNull();
         Assertions.assertThat(createDiagnosticResponse.getBody().status()).isEqualTo("PENDING");
     }
 }
