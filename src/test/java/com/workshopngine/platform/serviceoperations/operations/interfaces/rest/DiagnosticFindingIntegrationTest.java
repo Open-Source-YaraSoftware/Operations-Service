@@ -18,6 +18,8 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
+
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class DiagnosticFindingIntegrationTest {
@@ -52,7 +54,10 @@ class DiagnosticFindingIntegrationTest {
         CreateDiagnosticFindingResource createDiagnosticFindingResource1 = new CreateDiagnosticFindingResource(
                 "Finding description",
                 "LOW",
-                100
+                "solution description",
+                "IMMEDIATE",
+                BigDecimal.valueOf(100),
+                "remarks"
         );
 
         ResponseEntity<DiagnosticFindingResource> createdDiagnosticFindingResponse1 = testRestTemplate.exchange(
@@ -68,8 +73,11 @@ class DiagnosticFindingIntegrationTest {
 
         CreateDiagnosticFindingResource createDiagnosticFindingResource2 = new CreateDiagnosticFindingResource(
                 "Finding description",
-                "HIGH",
-                200
+                "LOW",
+                "solution description",
+                "IMMEDIATE",
+                BigDecimal.valueOf(100),
+                "remarks"
         );
 
         ResponseEntity<DiagnosticFindingResource> createdDiagnosticFindingResponse2 = testRestTemplate.exchange(
@@ -122,7 +130,10 @@ class DiagnosticFindingIntegrationTest {
         CreateDiagnosticFindingResource createDiagnosticFindingResource = new CreateDiagnosticFindingResource(
                 "Finding description",
                 "LOW",
-                100
+                "solution description",
+                "IMMEDIATE",
+                BigDecimal.valueOf(100),
+                "remarks"
         );
 
         // When
