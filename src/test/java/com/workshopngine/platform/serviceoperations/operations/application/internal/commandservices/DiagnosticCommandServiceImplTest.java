@@ -4,30 +4,21 @@ import com.workshopngine.platform.serviceoperations.operations.application.inter
 import com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates.Diagnostic;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticFindingCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateEvidenceCommand;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateRecommendationCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateAttachmentCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.DiagnosticFinding;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.*;
-import com.workshopngine.platform.serviceoperations.operations.domain.services.DiagnosticCommandService;
 import com.workshopngine.platform.serviceoperations.operations.infrastructure.persistence.jpa.repositories.DiagnosticRepository;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class DiagnosticCommandServiceImplTest {
@@ -37,30 +28,32 @@ class DiagnosticCommandServiceImplTest {
     @Mock
     private FileManagementContextFacade fileManagementContextFacade;
 
+    @InjectMocks
+    private DiagnosticCommandServiceImpl diagnosticCommandService;
+
     @Captor
     private ArgumentCaptor<Diagnostic> diagnosticArgumentCaptor;
 
-    private DiagnosticCommandService diagnosticCommandService;
-
-    @BeforeEach
-    void setUp() {
-        diagnosticCommandService = new DiagnosticCommandServiceImpl(diagnosticRepository, fileManagementContextFacade);
-    }
+    private static final String DIAGNOSTIC_ID = "1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+    private static final String INVALID_DIAGNOSTIC_ID = "111111c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+    private static final String DIAGNOSTIC_FINDING_ID = "1a132d-5e6f-7g8h-9i0j-a1b123123123f6";
+    private static final String WORKSHOP_ID_VALUE = "134534553d-5e6f-7g8h-9i0j-a1b12313535f6";
+    private static final String VEHICLE_ID_VALUE = "6868678d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+    private static final String MECHANIC_ID_VALUE = "3435567d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+    private static final String FILE_ID_VALUE = "0240525e6f-7g8h-9i0j-a1b2c3d4e5f6";
 
     @Test
     void TestCreateDiagnostic_ValidData_ShouldPass() {
         // Given
-        CreateDiagnosticCommand command = new CreateDiagnosticCommand(
-                new WorkshopId("1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new VehicleId("1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new MechanicId("1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new DiagnosticDetails("details", "details", "details")
-        );
+        CreateDiagnosticCommand command = buildCreateDiagnosticCommand();
+
         // When
         diagnosticCommandService.handle(command);
+
         // Then
         Mockito.verify(diagnosticRepository).save(diagnosticArgumentCaptor.capture());
         Diagnostic diagnostic = diagnosticArgumentCaptor.getValue();
+
         Assertions.assertThat(diagnostic.getWorkshopId())
                 .as("Workshop ID")
                 .isNotNull()
@@ -76,60 +69,48 @@ class DiagnosticCommandServiceImplTest {
                 .isNotNull()
                 .extracting("mechanicId")
                 .isEqualTo(command.mechanicId().mechanicId());
-        Assertions.assertThat(diagnostic.getDiagnosticDetails())
-                .as("Diagnostic details")
-                .isNotNull()
-                .extracting("reasonForDiagnostic", "expectedOutcome", "diagnosticProcedure")
-                .containsExactly("details", "details", "details");
+        Assertions.assertThat(diagnostic.getDiagnosticType())
+                .as("Diagnostic type")
+                .isEqualTo(command.diagnosticType());
+        Assertions.assertThat(diagnostic.getDesiredOutcome())
+                .as("Desired outcome")
+                .isEqualTo(command.desiredOutcome());
+        Assertions.assertThat(diagnostic.getDetails())
+                .as("Details")
+                .isEqualTo(command.details());
     }
 
     @Test
     void TestCreateDiagnosticFinding_ValidDiagnosticId_ValidData_ShouldPass() {
         // Given
-        CreateDiagnosticCommand createDiagnosticCommand = new CreateDiagnosticCommand(
-                new WorkshopId("1a2b312d-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new VehicleId("123b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new MechanicId("1a22344d-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new DiagnosticDetails("details", "details", "details")
-        );
-        var createdDiagnostic = new Diagnostic(createDiagnosticCommand);
+        CreateDiagnosticCommand createDiagnosticCommand = buildCreateDiagnosticCommand();
+        Diagnostic existingDiagnostic = buildDiagnostic(createDiagnosticCommand);
 
         Mockito.when(diagnosticRepository.findById(Mockito.anyString()))
-                .thenReturn(Optional.of(createdDiagnostic));
+                .thenReturn(Optional.of(existingDiagnostic));
 
-        CreateDiagnosticFindingCommand commandFinding = new CreateDiagnosticFindingCommand(
-                "1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6",
-                "details",
-                EFindingSeverity.CRITICAL,
-                100
-        );
+        CreateDiagnosticFindingCommand findingCommand = buildCreateDiagnosticFindingCommand(DIAGNOSTIC_ID);
 
         // When
-        diagnosticCommandService.handle(commandFinding);
+        diagnosticCommandService.handle(findingCommand);
 
         // Then
         Mockito.verify(diagnosticRepository).save(diagnosticArgumentCaptor.capture());
         Diagnostic updatedDiagnostic = diagnosticArgumentCaptor.getValue();
-        Assertions.assertThat(updatedDiagnostic.getDiagnosticFindings())
+
+        Assertions.assertThat(updatedDiagnostic.getFindings())
                 .as("Diagnostic findings")
                 .isNotNull()
                 .hasSize(1)
                 .first()
-                .extracting("description", "severity", "estimatedRepairCost")
-                .containsExactly("details", EFindingSeverity.CRITICAL, 100);
+                .extracting("description", "severity", "proposedSolution", "estimatedRepairCost", "remarks")
+                .containsExactly("details", EFindingSeverity.CRITICAL, null, BigDecimal.valueOf(100), null);
     }
 
     @Test
     void TestCreateDiagnosticFinding_InvalidDiagnosticId_ValidData_ShouldThrowIllegalArgumentException() {
         // Given
-        String invalidDiagnosticId = "1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
-
-        CreateDiagnosticFindingCommand command = new CreateDiagnosticFindingCommand(
-                invalidDiagnosticId,
-                "details",
-                EFindingSeverity.CRITICAL,
-                100
-        );
+        CreateDiagnosticFindingCommand findingCommand = buildCreateDiagnosticFindingCommand(INVALID_DIAGNOSTIC_ID);
 
         Mockito.when(diagnosticRepository.findById(Mockito.anyString()))
                 .thenReturn(Optional.empty());
@@ -137,40 +118,38 @@ class DiagnosticCommandServiceImplTest {
         // When
 
         // Then
-        Assertions.assertThatThrownBy(() -> diagnosticCommandService.handle(command))
+        Assertions.assertThatThrownBy(() -> diagnosticCommandService.handle(findingCommand))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Diagnostic with ID %s not found".formatted(invalidDiagnosticId));
+                .hasMessage("Diagnostic with ID %s not found".formatted(INVALID_DIAGNOSTIC_ID));
     }
 
     @Test
-    void TestCreateDiagnosticEvidence_ValidData_ShouldPass() {
+    void TestCreateDiagnosticAttachment_ValidData_ShouldPass() {
         // Given
-        var validDiagnosticId = "1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
-        var validDiagnosticFindingId = "1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
-        var validFileId = "1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+        CreateDiagnosticCommand createDiagnosticCommand = CreateDiagnosticCommand.builder()
+                .workshopId(new WorkshopId(WORKSHOP_ID_VALUE))
+                .vehicleId(new VehicleId(VEHICLE_ID_VALUE))
+                .mechanicId(new MechanicId(MECHANIC_ID_VALUE))
+                .diagnosticType(EDiagnosticType.PREVENTIVE)
+                .desiredOutcome("desired outcome")
+                .details("details")
+                .build();
+        CreateDiagnosticFindingCommand createFindingCommand = CreateDiagnosticFindingCommand.builder()
+                .diagnosticId(DIAGNOSTIC_ID)
+                .description("details")
+                .severity(EFindingSeverity.CRITICAL)
+                .estimatedRepairCost(BigDecimal.valueOf(100))
+                .build();
 
-        var createDiagnosticCommand = new CreateDiagnosticCommand(
-                new WorkshopId("1a2b3123123123-7g8h-9i0j-a1b2c3d4e5f6"),
-                new VehicleId("123b345-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new MechanicId("1a2456456-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new DiagnosticDetails("details", "details", "details")
-        );
-        var createFindingCommand = new CreateDiagnosticFindingCommand(
-                validDiagnosticId,
-                "details",
-                EFindingSeverity.CRITICAL,
-                100
-        );
+        Diagnostic createdDiagnostic = new Diagnostic(createDiagnosticCommand);
+        createdDiagnostic.setId(DIAGNOSTIC_ID);
 
-        var createdDiagnostic = new Diagnostic(createDiagnosticCommand);
-        createdDiagnostic.setId(validDiagnosticId);
+        DiagnosticFinding createdDiagnosticFinding = new DiagnosticFinding(createFindingCommand, createdDiagnostic);
+        createdDiagnosticFinding.setId(DIAGNOSTIC_FINDING_ID);
 
-        var createdDiagnosticFinding = new DiagnosticFinding(createFindingCommand, createdDiagnostic);
-        createdDiagnosticFinding.setId(validDiagnosticFindingId);
+        createdDiagnostic.setFindings(List.of(createdDiagnosticFinding));
 
-        createdDiagnostic.setDiagnosticFindings(List.of(createdDiagnosticFinding));
-
-        Mockito.when(diagnosticRepository.findById(validDiagnosticId))
+        Mockito.when(diagnosticRepository.findById(DIAGNOSTIC_ID))
                 .thenReturn(Optional.of(createdDiagnostic));
 
         MockMultipartFile mockFile = new MockMultipartFile(
@@ -180,95 +159,59 @@ class DiagnosticCommandServiceImplTest {
                 "Fake Image Content".getBytes()
         );
 
-        var createEvidenceCommand = new CreateEvidenceCommand(
-                validDiagnosticId,
-                validDiagnosticFindingId,
-                mockFile,
-                "comment test"
-        );
+        CreateAttachmentCommand createAttachmentCommand = CreateAttachmentCommand.builder()
+                .diagnosticId(DIAGNOSTIC_ID)
+                .diagnosticFindingId(DIAGNOSTIC_FINDING_ID)
+                .file(mockFile)
+                .description("description test")
+                .build();
 
         Mockito.when(fileManagementContextFacade.fetchUploadFile(Mockito.any(MultipartFile.class)))
-                .thenReturn(new FileIdFeign(validFileId));
+                .thenReturn(new FileIdFeign(FILE_ID_VALUE));
 
         // When
-        diagnosticCommandService.handle(createEvidenceCommand);
+        diagnosticCommandService.handle(createAttachmentCommand);
 
         // Then
         Mockito.verify(diagnosticRepository).save(diagnosticArgumentCaptor.capture());
         Diagnostic updatedDiagnostic = diagnosticArgumentCaptor.getValue();
         Assertions.assertThat(updatedDiagnostic).isNotNull();
-        Assertions.assertThat(updatedDiagnostic.getDiagnosticFindings())
+        Assertions.assertThat(updatedDiagnostic.getFindings())
                 .as("Diagnostic findings")
                 .isNotNull()
                 .hasSize(1);
-        Assertions.assertThat(updatedDiagnostic.getDiagnosticFindings().stream().findFirst().get())
-                .as("Diagnostic finding")
-                .isNotNull();
-        Assertions.assertThat(updatedDiagnostic.getDiagnosticFindings().stream().findFirst().get().getEvidences())
+        Assertions.assertThat(updatedDiagnostic.getFindings().stream().findFirst().get().getAttachments())
                 .as("Diagnostic finding evidences")
                 .isNotNull()
                 .hasSize(1)
                 .first()
-                .extracting("comment", "fileId")
-                .containsExactly("comment test", new FileId(validFileId));
+                .extracting("description", "fileId")
+                .containsExactly("description test", new FileId(FILE_ID_VALUE));
     }
 
-    @Test
-    void TestCreateDiagnosticRecommendation_ValidData_ShouldPass() {
-        // Given
-        var validDiagnosticId = "1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
-        var validDiagnosticFindingId = "1a2b3c4d-5e6f-7g8h-9i0j-a1b2c3d4e5f6";
+    private CreateDiagnosticCommand buildCreateDiagnosticCommand() {
+        return CreateDiagnosticCommand.builder()
+                .workshopId(new WorkshopId(WORKSHOP_ID_VALUE))
+                .vehicleId(new VehicleId(VEHICLE_ID_VALUE))
+                .mechanicId(new MechanicId(MECHANIC_ID_VALUE))
+                .diagnosticType(EDiagnosticType.PREVENTIVE)
+                .desiredOutcome("desired outcome")
+                .details("details")
+                .build();
+    }
 
-        var createDiagnosticCommand = new CreateDiagnosticCommand(
-                new WorkshopId("1a2b3123123123-7g8h-9i0j-a1b2c3d4e5f6"),
-                new VehicleId("123b345-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new MechanicId("1a2456456-5e6f-7g8h-9i0j-a1b2c3d4e5f6"),
-                new DiagnosticDetails("details", "details", "details")
-        );
-        var createFindingCommand = new CreateDiagnosticFindingCommand(
-                validDiagnosticId,
-                "details",
-                EFindingSeverity.CRITICAL,
-                100
-        );
+    private Diagnostic buildDiagnostic(CreateDiagnosticCommand command) {
+        Diagnostic diagnostic = new Diagnostic(command);
+        diagnostic.setId(DIAGNOSTIC_ID);
+        return diagnostic;
+    }
 
-        var createdDiagnostic = new Diagnostic(createDiagnosticCommand);
-        createdDiagnostic.setId(validDiagnosticId);
-
-        var createdDiagnosticFinding = new DiagnosticFinding(createFindingCommand, createdDiagnostic);
-        createdDiagnosticFinding.setId(validDiagnosticFindingId);
-
-        createdDiagnostic.setDiagnosticFindings(List.of(createdDiagnosticFinding));
-
-        Mockito.when(diagnosticRepository.findById(validDiagnosticId))
-                .thenReturn(Optional.of(createdDiagnostic));
-
-        var createRecommendationCommand = new CreateRecommendationCommand(
-                validDiagnosticId,
-                validDiagnosticFindingId,
-                "details recommendation"
-        );
-
-        // When
-        diagnosticCommandService.handle(createRecommendationCommand);
-
-        // Then
-        Mockito.verify(diagnosticRepository).save(diagnosticArgumentCaptor.capture());
-        Diagnostic updatedDiagnostic = diagnosticArgumentCaptor.getValue();
-        Assertions.assertThat(updatedDiagnostic).isNotNull();
-        Assertions.assertThat(updatedDiagnostic.getDiagnosticFindings())
-                .as("Diagnostic findings")
-                .isNotNull()
-                .hasSize(1);
-        Assertions.assertThat(updatedDiagnostic.getDiagnosticFindings().stream().findFirst().get())
-                .as("Diagnostic finding")
-                .isNotNull();
-        Assertions.assertThat(updatedDiagnostic.getDiagnosticFindings().stream().findFirst().get().getRecommendedActions())
-                .as("Diagnostic finding recommendations")
-                .isNotNull()
-                .hasSize(1)
-                .first()
-                .extracting("content")
-                .isEqualTo("details recommendation");
+    private CreateDiagnosticFindingCommand buildCreateDiagnosticFindingCommand(String diagnosticId) {
+        return CreateDiagnosticFindingCommand.builder()
+                .diagnosticId(diagnosticId)
+                .description("details")
+                .severity(EFindingSeverity.CRITICAL)
+                .estimatedRepairCost(BigDecimal.valueOf(100))
+                .build();
     }
 }
