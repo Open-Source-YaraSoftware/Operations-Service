@@ -1,8 +1,8 @@
 package com.workshopngine.platform.serviceoperations.operations.domain.model.entities;
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates.Diagnostic;
-import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticFindingCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateAttachmentCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateDiagnosticFindingCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EFindingSeverity;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EFindingStatus;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.FileId;

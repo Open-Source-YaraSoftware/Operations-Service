@@ -10,10 +10,11 @@ public class DiagnosticResourceFromEntityAssembler {
                 entity.getWorkshopId().workshopId(),
                 entity.getVehicleId().vehicleId(),
                 entity.getMechanicId().mechanicId(),
-                entity.getDiagnosticDetails().reasonForDiagnostic(),
-                entity.getDiagnosticDetails().expectedOutcome(),
-                entity.getDiagnosticDetails().diagnosticProcedure(),
-                entity.getStatus().toString()
+                entity.getDiagnosticType().toString(),
+                entity.getDesiredOutcome(),
+                entity.getDetails(),
+                entity.getStatus().toString(),
+                entity.getCompletedAt()
         );
     }
 }
