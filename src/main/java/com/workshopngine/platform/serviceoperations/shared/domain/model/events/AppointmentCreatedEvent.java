@@ -10,15 +10,17 @@ public class AppointmentCreatedEvent extends ApplicationEvent implements DomainE
     private final String vehicleId;
     private final String mechanicId;
     private final String workshopId;
+    private final String serviceType;
     private final String appointmentDate;
 
-    public AppointmentCreatedEvent(Object source, String appointmentId, String clientId, String vehicleId, String mechanicId, String workshopId, String appointmentDate) {
+    public AppointmentCreatedEvent(Object source, String appointmentId, String clientId, String vehicleId, String mechanicId, String workshopId, String serviceType, String appointmentDate) {
         super(source);
         this.appointmentId = appointmentId;
         this.clientId = clientId;
         this.vehicleId = vehicleId;
         this.mechanicId = mechanicId;
         this.workshopId = workshopId;
+        this.serviceType = serviceType;
         this.appointmentDate = appointmentDate;
     }
 }
