@@ -16,9 +16,11 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
+
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class EvidenceIntegrationTest {
+class MediaAttachmentIntegrationTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:9.2.0");
@@ -51,7 +53,10 @@ class EvidenceIntegrationTest {
         CreateDiagnosticFindingResource createDiagnosticFindingResource = new CreateDiagnosticFindingResource(
                 "Finding description",
                 "LOW",
-                100
+                "solution description",
+                "IMMEDIATE",
+                BigDecimal.valueOf(100),
+                "remarks"
         );
 
         ResponseEntity<DiagnosticFindingResource> createdDiagnosticFindingResponse = testRestTemplate.exchange(
@@ -76,8 +81,8 @@ class EvidenceIntegrationTest {
         Assertions.assertThat(diagnosticFindingsResponse.getBody()).isNotNull();
         String findingId = diagnosticFindingsResponse.getBody()[0].id();
 
-        CreateEvidenceResource createEvidenceResource = new CreateEvidenceResource(
-                "Evidence comment"
+        CreateAttachmentResource createAttachmentResource = new CreateAttachmentResource(
+                "Evidence description"
         );
 
         ByteArrayResource fileResource = new ByteArrayResource("evidence".getBytes()) {
@@ -89,18 +94,18 @@ class EvidenceIntegrationTest {
 
         // When
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("resource", new HttpEntity<>(createEvidenceResource, createJsonHeaders()));
+        body.add("resource", new HttpEntity<>(createAttachmentResource, createJsonHeaders()));
         body.add("file", new HttpEntity<>(fileResource, createFileHeaders()));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<EvidenceResource> createdEvidenceResponse = testRestTemplate.exchange(
+        ResponseEntity<AttachmentResource> createdEvidenceResponse = testRestTemplate.exchange(
                 "/diagnostics/{diagnosticId}/findings/{findingId}/evidences",
                 HttpMethod.POST,
                 requestEntity,
-                EvidenceResource.class,
+                AttachmentResource.class,
                 diagnosticId,
                 findingId
         );
@@ -108,7 +113,7 @@ class EvidenceIntegrationTest {
         // Then
         Assertions.assertThat(createdEvidenceResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(createdEvidenceResponse.getBody()).isNotNull();
-        Assertions.assertThat(createdEvidenceResponse.getBody().comment()).isEqualTo(createEvidenceResource.comment());
+        Assertions.assertThat(createdEvidenceResponse.getBody().description()).isEqualTo(createAttachmentResource.comment());
     }
 
     private HttpHeaders createJsonHeaders() {
