@@ -37,6 +37,7 @@ public class WorkOrderItem extends AuditableModel {
 
     public WorkOrderItem() {
         super();
+        this.serviceId = new ServiceId();
         this.itemStatus = EWorkOrderItemStatus.PENDING;
         this.followUpFromItemId = Strings.EMPTY;
     }

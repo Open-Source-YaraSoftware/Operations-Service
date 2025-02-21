@@ -7,7 +7,7 @@ public class WorkOrderItemResourceFromEntityAssembler {
     public static WorkOrderItemResource toResourceFromEntity(WorkOrderItem entity) {
         return WorkOrderItemResource.builder()
                 .id(entity.getId())
-                .serviceId(entity.getServiceId().toString())
+                .serviceId(entity.getServiceId().serviceId())
                 .serviceType(entity.getServiceType().toString())
                 .itemStatus(entity.getItemStatus().toString())
                 .followUpFromItemId(entity.getFollowUpFromItemId())
