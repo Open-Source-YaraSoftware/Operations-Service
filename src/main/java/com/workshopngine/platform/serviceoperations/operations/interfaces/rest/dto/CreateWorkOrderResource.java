@@ -1,5 +1,8 @@
 package com.workshopngine.platform.serviceoperations.operations.interfaces.rest.dto;
 
+import lombok.Builder;
+
+@Builder
 public record CreateWorkOrderResource(
         String clientId,
         String vehicleId,
@@ -7,6 +10,7 @@ public record CreateWorkOrderResource(
         String workshopId,
         String mechanicAssignedId,
         String priority,
-        String requestType
+        String requestType,
+        String serviceType
 ) {
 }

@@ -9,6 +9,7 @@ public record CreateWorkOrderCommand(
         WorkshopId workshopId,
         MechanicId mechanicId,
         EPriority priority,
-        ERequestType requestType
+        ERequestType requestType,
+        EServiceType serviceType
 ) {
 }

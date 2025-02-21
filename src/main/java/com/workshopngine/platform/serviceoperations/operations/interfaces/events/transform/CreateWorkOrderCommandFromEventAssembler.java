@@ -12,8 +12,9 @@ public class CreateWorkOrderCommandFromEventAssembler {
                 new AppointmentId(event.getAppointmentId()),
                 new WorkshopId(event.getWorkshopId()),
                 new MechanicId(event.getMechanicId()),
-                EPriority.LOW,
-                ERequestType.SCHEDULED
+                null,
+                null,
+                EServiceType.fromString(event.getServiceType())
         );
     }
 }

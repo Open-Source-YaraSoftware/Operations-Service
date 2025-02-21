@@ -15,11 +15,9 @@ public class WorkOrderResourceFromEntityAssembler {
                 entity.getStatus().toString(),
                 entity.getPriority().toString(),
                 entity.getRequestType().toString(),
-                entity.getCost().getTotalCost(),
-                entity.getCost().getCurrency(),
-                entity.getTimeInterval().getStart(),
-                entity.getTimeInterval().getEnd(),
-                entity.getTimeInterval().getDuration()
+                entity.getTotalEstimatedCost().getAmount(),
+                entity.getTotalEstimatedCost().getCurrency(),
+                entity.getTotalEstimatedCost().getCostStatus().toString()
         );
     }
 }
