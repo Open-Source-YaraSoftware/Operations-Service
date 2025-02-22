@@ -1,11 +1,15 @@
 package com.workshopngine.platform.serviceoperations.operations.application.internal.commandservices;
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates.ServiceOrder;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateExecutedProcedureCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateServiceOrderCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.ExecutedProcedure;
 import com.workshopngine.platform.serviceoperations.operations.domain.services.ServiceOrderCommandService;
 import com.workshopngine.platform.serviceoperations.operations.infrastructure.persistence.jpa.repositories.ServiceOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -21,5 +25,10 @@ public class ServiceOrderCommandServiceImpl implements ServiceOrderCommandServic
             throw new IllegalArgumentException("Error while saving work order: " + e.getMessage());
         }
         return workOrder.getId();
+    }
+
+    @Override
+    public Optional<ExecutedProcedure> handle(CreateExecutedProcedureCommand command) {
+        return Optional.empty();
     }
 }
