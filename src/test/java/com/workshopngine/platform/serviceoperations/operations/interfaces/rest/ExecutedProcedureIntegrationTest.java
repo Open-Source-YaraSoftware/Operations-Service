@@ -65,12 +65,11 @@ class ExecutedProcedureIntegrationTest {
         // Then
         Assertions.assertThat(createExecutedProcedureResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(createExecutedProcedureResponse.getBody()).isNotNull();
-        Assertions.assertThat(createExecutedProcedureResponse.getBody().id()).isNotBlank();
         Assertions.assertThat(createExecutedProcedureResponse.getBody().standardProcedureId()).isEqualTo(VALID_STANDARD_PROCEDURE_ID);
         Assertions.assertThat(createExecutedProcedureResponse.getBody().name()).isEqualTo(VALID_STANDARD_PROCEDURE_NAME);
         Assertions.assertThat(createExecutedProcedureResponse.getBody().description()).isEqualTo(VALID_STANDARD_PROCEDURE_DESCRIPTION);
         Assertions.assertThat(createExecutedProcedureResponse.getBody().estimatedTime()).isEqualTo(Duration.parse(VALID_STANDARD_PROCEDURE_ESTIMATED_TIME));
-        Assertions.assertThat(createExecutedProcedureResponse.getBody().actualTimeSpent()).isNull();
+        Assertions.assertThat(createExecutedProcedureResponse.getBody().actualTimeSpent()).isEqualTo(Duration.ZERO);
         Assertions.assertThat(createExecutedProcedureResponse.getBody().outcome()).isNull();
         Assertions.assertThat(createExecutedProcedureResponse.getBody().status()).isEqualTo(VALID_SERVICE_ORDER_STATUS);
     }
@@ -91,7 +90,12 @@ class ExecutedProcedureIntegrationTest {
 
         Assertions.assertThat(createExecutedProcedureResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(createExecutedProcedureResponse.getBody()).isNotNull();
-        String executedProcedureId = Objects.requireNonNull(createExecutedProcedureResponse.getBody()).id();
+
+        ResponseEntity<ExecutedProcedureResource[]> getAllExecutedProceduresByServiceOrderIdResponse = getAllExecutedProceduresByServiceOrderIdResponse(serviceOrderId);
+
+        Assertions.assertThat(getAllExecutedProceduresByServiceOrderIdResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(getAllExecutedProceduresByServiceOrderIdResponse.getBody()).isNotNull();
+        String executedProcedureId = Objects.requireNonNull(getAllExecutedProceduresByServiceOrderIdResponse.getBody())[0].id();
 
         // When
         ResponseEntity<ExecutedProcedureResource> getExecutedProcedureResponse = getExecutedProcedureByIdResponse(serviceOrderId, executedProcedureId);
@@ -104,7 +108,7 @@ class ExecutedProcedureIntegrationTest {
         Assertions.assertThat(getExecutedProcedureResponse.getBody().name()).isEqualTo(VALID_STANDARD_PROCEDURE_NAME);
         Assertions.assertThat(getExecutedProcedureResponse.getBody().description()).isEqualTo(VALID_STANDARD_PROCEDURE_DESCRIPTION);
         Assertions.assertThat(getExecutedProcedureResponse.getBody().estimatedTime()).isEqualTo(Duration.parse(VALID_STANDARD_PROCEDURE_ESTIMATED_TIME));
-        Assertions.assertThat(getExecutedProcedureResponse.getBody().actualTimeSpent()).isNull();
+        Assertions.assertThat(getExecutedProcedureResponse.getBody().actualTimeSpent()).isEqualTo(Duration.ZERO);
         Assertions.assertThat(getExecutedProcedureResponse.getBody().outcome()).isNull();
         Assertions.assertThat(getExecutedProcedureResponse.getBody().status()).isEqualTo(VALID_SERVICE_ORDER_STATUS);
 

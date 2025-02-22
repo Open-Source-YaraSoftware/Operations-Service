@@ -63,7 +63,7 @@ public class ExecutedProcedureController {
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
     public ResponseEntity<ExecutedProcedureResource> createExecutedProcedure(@PathVariable String serviceOrderId, @RequestBody CreateExecutedProcedureResource resource){
-        var command = CreateExecutedProcedureCommandFromResourceAssembler.toCommandFromResource(resource);
+        var command = CreateExecutedProcedureCommandFromResourceAssembler.toCommandFromResource(serviceOrderId, resource);
         var executedProcedure = serviceOrderCommandService.handle(command);
         if (executedProcedure.isEmpty()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         var executedProcedureResource = ExecutedProcedureResourceFromEntityAssembler.toResourceFromEntity(executedProcedure.get());
