@@ -6,6 +6,14 @@ import com.workshopngine.platform.serviceoperations.operations.interfaces.rest.d
 public class ExecutedProcedureResourceFromEntityAssembler {
     public static ExecutedProcedureResource toResourceFromEntity(ExecutedProcedure executedProcedure) {
         return ExecutedProcedureResource.builder()
+                .id(executedProcedure.getId())
+                .standardProcedureId(executedProcedure.getStandardProcedureId().standardProcedureId())
+                .name(executedProcedure.getName())
+                .description(executedProcedure.getDescription())
+                .estimatedTime(executedProcedure.getEstimatedTime())
+                .actualTimeSpent(executedProcedure.getActualTimeSpent())
+                .outcome(executedProcedure.getOutcome() != null ? executedProcedure.getOutcome().toString() : null)
+                .status(executedProcedure.getStatus().toString())
                 .build();
     }
 }
