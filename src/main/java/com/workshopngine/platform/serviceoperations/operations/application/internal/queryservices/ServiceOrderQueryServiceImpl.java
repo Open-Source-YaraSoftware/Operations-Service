@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -26,11 +25,16 @@ public class ServiceOrderQueryServiceImpl implements ServiceOrderQueryService {
 
     @Override
     public Optional<ExecutedProcedure> handle(GetExecutedProcedureByIdQuery query) {
-        return Optional.empty();
+        var serviceOrder = serviceOrderRepository.findById(query.serviceOrderId());
+        if (serviceOrder.isEmpty()) throw new IllegalArgumentException("Service with id %s not found".formatted(query.serviceOrderId()));
+        var executedProcedure = serviceOrder.get().findExecutedProcedureById(query.executedProcedureId());
+        return Optional.ofNullable(executedProcedure);
     }
 
     @Override
     public Collection<ExecutedProcedure> handle(GetAllExecutedProceduresByServiceOrderIdQuery query) {
-        return List.of();
+        var serviceOrder = serviceOrderRepository.findById(query.serviceOrderId());
+        if (serviceOrder.isEmpty()) throw new IllegalArgumentException("Service with id %s not found".formatted(query.serviceOrderId()));
+        return serviceOrder.get().getExecutedProcedures();
     }
 }

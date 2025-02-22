@@ -29,6 +29,14 @@ public class ServiceOrderCommandServiceImpl implements ServiceOrderCommandServic
 
     @Override
     public Optional<ExecutedProcedure> handle(CreateExecutedProcedureCommand command) {
-        return Optional.empty();
+        var serviceOrder = serviceOrderRepository.findById(command.serviceOrderId());
+        if (serviceOrder.isEmpty()) throw new IllegalArgumentException("Service with id %s not found".formatted(command.serviceOrderId()));
+        var executedProcedure = serviceOrder.get().addExecutedProcedure(command);
+        try {
+            serviceOrderRepository.save(serviceOrder.get());
+            return Optional.of(executedProcedure);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while saving executed procedure: " + e.getMessage());
+        }
     }
 }
