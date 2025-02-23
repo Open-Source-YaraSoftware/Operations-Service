@@ -1,7 +1,9 @@
 package com.workshopngine.platform.serviceoperations.operations.application.internal.commandservices;
 
+import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.ExecutedStep;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates.ServiceOrder;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateExecutedProcedureCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateExecutedStepCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateServiceOrderCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.ExecutedProcedure;
 import com.workshopngine.platform.serviceoperations.operations.domain.services.ServiceOrderCommandService;
@@ -38,5 +40,10 @@ public class ServiceOrderCommandServiceImpl implements ServiceOrderCommandServic
         } catch (Exception e) {
             throw new IllegalArgumentException("Error while saving executed procedure: " + e.getMessage());
         }
+    }
+
+    @Override
+    public Optional<ExecutedStep> handle(CreateExecutedStepCommand command) {
+        return Optional.empty();
     }
 }
