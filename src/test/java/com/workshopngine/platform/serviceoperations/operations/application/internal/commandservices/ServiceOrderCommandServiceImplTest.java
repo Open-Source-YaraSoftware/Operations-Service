@@ -71,7 +71,7 @@ class ServiceOrderCommandServiceImplTest {
         Assertions.assertThat(serviceOrder.getAssignedMechanicId())
                 .as("Assigned Mechanic ID")
                 .isNotNull()
-                .extracting("mechanicId")
+                .extracting("assignedMechanicId")
                 .isEqualTo(VALID_MECHANIC_ASSIGNED_ID);
 
         Assertions.assertThat(serviceOrder.getWorkOrderId())

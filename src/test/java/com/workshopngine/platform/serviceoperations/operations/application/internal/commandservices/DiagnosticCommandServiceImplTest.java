@@ -67,7 +67,7 @@ class DiagnosticCommandServiceImplTest {
         Assertions.assertThat(diagnostic.getMechanicId())
                 .as("Mechanic ID")
                 .isNotNull()
-                .extracting("mechanicId")
+                .extracting("assignedMechanicId")
                 .isEqualTo(command.mechanicId().mechanicId());
         Assertions.assertThat(diagnostic.getDiagnosticType())
                 .as("Diagnostic type")
