@@ -24,7 +24,7 @@ public class ServiceOrderCommandServiceImpl implements ServiceOrderCommandServic
         try {
             serviceOrderRepository.save(workOrder);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Error while saving work order: " + e.getMessage());
+            throw new IllegalArgumentException("Error while saving service order");
         }
         return workOrder.getId();
     }
@@ -44,6 +44,14 @@ public class ServiceOrderCommandServiceImpl implements ServiceOrderCommandServic
 
     @Override
     public Optional<ExecutedStep> handle(CreateExecutedStepCommand command) {
-        return Optional.empty();
+        var serviceOrder = serviceOrderRepository.findById(command.serviceOrderId());
+        if (serviceOrder.isEmpty()) throw new IllegalArgumentException("Service with id %s not found".formatted(command.serviceOrderId()));
+        var executedStep = serviceOrder.get().addExecutedStep(command);
+        try {
+            serviceOrderRepository.save(serviceOrder.get());
+            return Optional.of(executedStep);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while saving executed step: " + e.getMessage());
+        }
     }
 }

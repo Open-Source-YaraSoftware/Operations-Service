@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -40,11 +39,20 @@ public class ServiceOrderQueryServiceImpl implements ServiceOrderQueryService {
 
     @Override
     public Optional<ExecutedStep> handle(GetExecutedStepByIdQuery query) {
-        return Optional.empty();
+        var serviceOrder = serviceOrderRepository.findById(query.serviceOrderId());
+        if (serviceOrder.isEmpty()) throw new IllegalArgumentException("Service with id %s not found".formatted(query.serviceOrderId()));
+        var executedProcedure = serviceOrder.get().findExecutedProcedureById(query.executedProcedureId());
+        if (executedProcedure == null) throw new IllegalArgumentException("Executed procedure with id %s not found".formatted(query.executedProcedureId()));
+        var executedStep = executedProcedure.findExecutedStepById(query.executedStepId());
+        return Optional.ofNullable(executedStep);
     }
 
     @Override
     public Collection<ExecutedStep> handle(GetAllExecutedStepsByExecutedProcedureIdQuery query) {
-        return List.of();
+        var serviceOrder = serviceOrderRepository.findById(query.serviceOrderId());
+        if (serviceOrder.isEmpty()) throw new IllegalArgumentException("Service with id %s not found".formatted(query.serviceOrderId()));
+        var executedProcedure = serviceOrder.get().findExecutedProcedureById(query.executedProcedureId());
+        if (executedProcedure == null) throw new IllegalArgumentException("Executed procedure with id %s not found".formatted(query.executedProcedureId()));
+        return executedProcedure.getExecutedSteps();
     }
 }
