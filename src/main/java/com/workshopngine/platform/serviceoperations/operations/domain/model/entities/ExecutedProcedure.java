@@ -2,6 +2,7 @@ package com.workshopngine.platform.serviceoperations.operations.domain.model.ent
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates.ServiceOrder;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateExecutedProcedureCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateExecutedStepCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EExecutedProcedureOutcome;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.EExecutedProcedureStatus;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.StandardProcedureId;
@@ -14,6 +15,8 @@ import lombok.Setter;
 import org.apache.logging.log4j.util.Strings;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Entity
 @Setter
@@ -47,6 +50,9 @@ public class ExecutedProcedure extends AuditableModel {
     @Enumerated(EnumType.STRING)
     private EExecutedProcedureStatus status;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "executedProcedure")
+    private Collection<ExecutedStep> executedSteps;
+
     public ExecutedProcedure() {
         super();
         this.name = Strings.EMPTY;
@@ -55,6 +61,7 @@ public class ExecutedProcedure extends AuditableModel {
         this.actualTimeSpent = Duration.ZERO;
         this.outcome = null;
         this.status = EExecutedProcedureStatus.PENDING;
+        this.executedSteps = new ArrayList<>();
     }
 
     public ExecutedProcedure(CreateExecutedProcedureCommand command, ServiceOrder serviceOrder) {
@@ -64,5 +71,19 @@ public class ExecutedProcedure extends AuditableModel {
         this.name = command.name();
         this.description = command.description();
         this.estimatedTime = command.estimatedTime();
+    }
+
+    public ExecutedStep addExecutedStep(CreateExecutedStepCommand command) {
+        ExecutedStep executedStep = new ExecutedStep(command, this);
+        this.executedSteps.add(executedStep);
+        return executedStep;
+    }
+
+    public ExecutedStep findExecutedStepById(String executedStepId) {
+        return this.executedSteps
+            .stream()
+            .filter(executedStep -> executedStep.getId().equals(executedStepId))
+            .findFirst()
+            .orElse(null);
     }
 }

@@ -1,8 +1,10 @@
 package com.workshopngine.platform.serviceoperations.operations.domain.model.aggregates;
 
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateExecutedProcedureCommand;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateExecutedStepCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.commands.CreateServiceOrderCommand;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.ExecutedProcedure;
+import com.workshopngine.platform.serviceoperations.operations.domain.model.entities.ExecutedStep;
 import com.workshopngine.platform.serviceoperations.operations.domain.model.valueobjects.*;
 import com.workshopngine.platform.serviceoperations.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
@@ -79,5 +81,10 @@ public class ServiceOrder extends AuditableAbstractAggregateRoot<ServiceOrder> {
                 .filter(ep -> ep.getId().equals(executedProcedureId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public ExecutedStep addExecutedStep(CreateExecutedStepCommand command) {
+        ExecutedProcedure executedProcedure = this.findExecutedProcedureById(command.executedProcedureId());
+        return executedProcedure.addExecutedStep(command);
     }
 }
