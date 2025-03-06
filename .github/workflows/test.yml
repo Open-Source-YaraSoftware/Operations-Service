@@ -2,9 +2,15 @@ name: Testing Workflow
 on:
   push:
     branches:
+      - develop
+      - release
       - feature/*
       - bugfix/*
       - hotfix/*
+  pull_request:
+    branches:
+      - develop
+      - release
 jobs:
   test:
     name: Test
@@ -21,4 +27,4 @@ jobs:
           cache: 'maven'
 
       - name: Integration and Unit tests
-        run: mvn test -B -Dspring.profiles.active=test
+        run: mvn test -B
