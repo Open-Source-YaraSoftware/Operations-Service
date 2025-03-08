@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.workshop-n-gine.platform</groupId>
 	<artifactId>service-operations</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.2.0</version>
 	<name>service-operations</name>
 	<description>service-operations</description>
 	<url/>
